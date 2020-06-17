@@ -1,7 +1,7 @@
-# cython: language_level=3, boundscheck=False
 #
 # dnet.pyx
 #
+# $Id$
 
 """dumb networking library
 
@@ -17,6 +17,7 @@ __copyright__ = 'Copyright (c) 2019 Oliver Falk'
 __license__ = 'BSD'
 __url__ = 'https://github.com/ofalk/libdnet'
 __version__ = '1.14'
+
 
 cdef extern from "dnet.h":
     pass
@@ -46,7 +47,7 @@ cdef __memcpy(char *dst, object src, int n):
     memcpy(dst, src, n)
 
 cdef __oserror():
-    cdef extern int errno = 0
+    cdef extern int errno
     return strerror(errno)
 
 def __iter_append(entry, l):
@@ -554,16 +555,25 @@ cdef class addr:
         a = addr()
         (<addr>a)._addr = self._addr
         return a
+
+    def __eq__(addr x, addr y):
+        return addr_cmp(&x._addr, &y._addr) == 0
+
+    def __ne__(addr x, addr y):
+        return addr_cmp(&x._addr, &y._addr) == 0
     
-    def __cmp__(addr x, addr y):
-        cdef int i
-        i = addr_cmp(&x._addr, &y._addr)
-        if i < 0:
-            return -1
-        if i > 0:
-            return 1
-        return 0
+    def __lt__(addr x, addr y):
+        return addr_cmp(&x._addr, &y._addr) == -1
     
+    def __gt__(addr x, addr y):
+        return addr_cmp(&x._addr, &y._addr) == 1
+    
+    def __le__(addr x, addr y):
+        return addr_cmp(&x._addr, &y._addr) != 1
+    
+    def __ge__(addr x, addr y):
+        return addr_cmp(&x._addr, &y._addr) != -1
+
     def __contains__(self, addr other):
         cdef addr_t s1, s2, o1, o2
         if addr_net(&self._addr, &s1) != 0 or \
@@ -1421,7 +1431,7 @@ cdef class __rand_xrange:
         while self.max > (1 << bits):
             bits = bits + 1
         
-        self.left = int(bits / 2)
+        self.left = bits / 2
         self.right = bits - self.left
         self.mask = (1 << bits) - 1
 
