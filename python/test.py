@@ -4,7 +4,7 @@ import sys, unittest
 
 sys.path.insert(0, './build')
 import dnet
-
+print("hello")
 class AddrTestCase(unittest.TestCase):
     def test_addr_cmp(self):
         for atxt in ('1.2.3.0', '0:d:e:a:d:0', 'fe::ed:fa:ce:0'):
